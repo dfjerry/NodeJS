@@ -12,18 +12,16 @@ app.set("view engine", "pug");
 //body-parser
 app.use(bodyParser.json()); // for parsing application/json
 app.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
-
+//low db
+var low = require('lowdb');
+var FileSync = require('lowdb/adapters/FileSync');
+var adapter = new FileSync('db.json');
+var db = low(adapter);
 // https://expressjs.com/en/starter/basic-routing.html
 app.get("/", function(req, res) {
   //req: request, res: response
   res.render("index"); //truyen vao path den file template ma minh muon render tinh ke tu view nay
 });
-var todos = [
-  { id: 1, name: "Đi chợ" },
-  { id: 2, name: "Nấu cơm" },
-  { id: 3, name: "Học codersX" },
-  { id: 4, name: "Tuan" }
-];
 // listen for requests :)
 app.listen(process.env.PORT, () => {
   console.log("Server listening on port " + process.env.PORT);
@@ -32,7 +30,7 @@ app.listen(process.env.PORT, () => {
 app.get("/todos", function(req, res) {
   //req: request, res: response
   res.render("todos/index", {
-    todos: todos
+    todos: db.get('todos').value()
   });
 });
 
@@ -53,6 +51,6 @@ app.get("/todos/create", function(req, res) {
   res.render("todos/create");
 });
 app.post("/todos/create", function(req, res) {
-  todos.push(req.body); // push phan tu moi create vao todos
+  db.get('todos').push(req.body).write(); // push phan tu moi create vao todos
   res.redirect('/todos'); // res thu 2 de back ve todos
 });
